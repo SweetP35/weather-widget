@@ -47,7 +47,7 @@ input.addEventListener('input', (event) => {
         if (filteredCities.length === 0) {
             form.classList.remove('_active');
             removeCard()
-            showError('No matching cities found');
+            showError('Город не найден');
         } else {
             filteredCities.forEach(({ name }) => {
                 const html = `<div class="select-body-item">${name}</div>`
@@ -93,10 +93,13 @@ function showCard(cardDetails) {
 }
 
 async function getWeather(city) {
-    const url = `http://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${city}`;
-    const response = await fetch(url);
-    const data = await response.json();
-    return data
+    const url = `https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${city}`;
+    try {
+        const response = await fetch(url);
+        return await response.json();
+    } catch {
+        return { error: { message: 'Не удалось загрузить погоду. Проверьте интернет-соединение' } };
+    }
 }
 
 
@@ -109,7 +112,7 @@ form.onsubmit = async function (e) {
     const data = await getWeather(city);
     if (data.error) {
         removeCard();
-        showError(data.error.message);
+        showError(data.error.code === 1006 ? 'Город не найден' : data.error.message);
     } else {
         removeCard();
 
